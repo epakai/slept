@@ -1,0 +1,32 @@
+Slept is a sleep tracker.
+
+When called without arguments it displays sleep logs in console in a 
+graphical form with each line representing a day's sleep. It should fill
+the terminal completely. Example:
+
+DATE	Sleep scaled to width. Start and endpoints are at noon   x/12 hours
+       ________________________________________________________    slept
+      |                                                        |
+
+03-21:           X^XXXXXXXXXXXXX*                ^             |========    
+03-22:            ^     XXXXXXXX*XX              ^             |=====     
+03-23:           X^XXXXXXXXXXXXX*XXXXXXX         ^             |==========  
+
+This example uses X and = where colored blocks should be used. The * and ^
+markers represent midnight and 6:00 (am and pm) respectively.
+
+Slept should be able to scroll the log using cursor/vim(jk) keys.
+
+To add new entries to slept it should accept several types of input.
+
+For normal use:
+	slept 3:00!5:30 10:20!6:00
+indicates sleep from 3-5:30 and 10:20 to 6 on the previous day's date.
+
+Dates may also be specified for entering older data. The date should be the
+first argument:
+	slept 3-20 3:00!5:00
+Slept should error for future dates.
+
+Prior entries can be amended. Old times are completely replaced:
+	slept -a 3-20 3:00!6:30
