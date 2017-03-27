@@ -16,6 +16,7 @@ This example uses X and = where colored blocks should be used. The * and ^
 markers represent midnight and 6:00 (am and pm) respectively.
 
 Slept should be able to scroll the log using cursor/vim(jk) keys.
+Slept should also be able to jump to a specific date.
 
 To add new entries to slept it should accept several types of input.
 
