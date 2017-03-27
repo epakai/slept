@@ -24,10 +24,13 @@ For normal use:
 	slept 15:00-5:30 10:20-6:00
 indicates sleep from 3-5:30 and 10:20 to 6 on the previous day's date.
 
-Dates may also be specified for entering older data. The date should be the
-first argument:
-	slept 3-20 3:00-5:00
+Dates may also be specified for entering older data. The date is specified
+with -d or --date first argument:
+	slept -d 3-20 3:00-5:00
 Slept should error for future dates.
 
-Prior entries can be amended. Old times are completely replaced:
-	slept -a 3-20 3:00-6:30
+Prior entries can be replaced. Old times are completely replaced:
+	slept -R -d 3-20 3:00-6:30
+
+Unimplemented add option may be in the future to add new times while
+retaining old entries.
