@@ -20,13 +20,13 @@ Slept should be able to scroll the log using cursor/vim(jk) keys.
 To add new entries to slept it should accept several types of input.
 
 For normal use:
-	slept 3:00!5:30 10:20!6:00
+	slept 15:00-5:30 10:20-6:00
 indicates sleep from 3-5:30 and 10:20 to 6 on the previous day's date.
 
 Dates may also be specified for entering older data. The date should be the
 first argument:
-	slept 3-20 3:00!5:00
+	slept 3-20 3:00-5:00
 Slept should error for future dates.
 
 Prior entries can be amended. Old times are completely replaced:
-	slept -a 3-20 3:00!6:30
+	slept -a 3-20 3:00-6:30
