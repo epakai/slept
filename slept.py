@@ -20,10 +20,12 @@ def datespec_conv(datespec):
             print('Invalid date argument. "', datespec[0], '"',
                   sep="", file=sys.stderr)
             sys.exit()
+
     if (sleep_date > date.today()):
         print('Cannot enter future sleep (check your date argument)',
               file=sys.stderr)
         sys.exit()
+
     return sleep_date
 
 
@@ -33,6 +35,7 @@ def timespec_conv(timespec):
         print('Bad time specification. "', timespec,
               '"', sep='', file=sys.stderr)
         sys.exit()
+
     times = timespec.split("-", 1)
     try:
         start = datetime.strptime(times[0], '%H:%M').time()
@@ -43,6 +46,7 @@ def timespec_conv(timespec):
             print('Bad time specification. "', timespec,
                   '"', sep="", file=sys.stderr)
             sys.exit()
+
     try:
         end = datetime.strptime(times[1], '%H:%M').time()
     except ValueError:
@@ -52,11 +56,13 @@ def timespec_conv(timespec):
             print('Bad time specification. "', timespec,
                   '"', sep="", file=sys.stderr)
             sys.exit()
+
     sleeptime = (start, end)
     if (sleep_time_key(sleeptime) > sleep_time_key((sleeptime[1], None))):
         print('Bad time specification. Start time is after end time. "',
               timespec, '"', sep="", file=sys.stderr)
         sys.exit()
+
     return sleeptime
 
 
@@ -65,6 +71,7 @@ def sleep_time_key(sleeptime):
         sort_key = (sleeptime[0].hour - 12) * 100
     else:
         sort_key = (sleeptime[0].hour + 12) * 100
+
     sort_key = sort_key + sleeptime[0].minute
     return sort_key
 
@@ -79,6 +86,7 @@ def check_times_overlap(sleep_times):
                   '-', sleep_times[x+1][1].strftime("%H:%M"), '"',
                   sep="", file=sys.stderr)
             sys.exit()
+
     return
 
 
@@ -91,6 +99,7 @@ def insert_times(sleep_times, sleep_date):
         print('Added sleep time ' + p[0].strftime("%H:%M") + ' to ' +
               p[1].strftime("%H:%M") + ' on ' +
               sleep_date.strftime("%Y-%m-%d"))
+
     conn.commit()
     return
 
@@ -101,7 +110,8 @@ def get_date_times(date):
                           "FROM sleep_times WHERE date='"
                           + date.strftime("%Y-%m-%d") + "'"):
         sleep_list.append((datetime.strptime(row[0], '%H:%M').time(),
-                          datetime.strptime(row[1], '%H:%M').time()))
+                           datetime.strptime(row[1], '%H:%M').time()))
+
     return sleep_list
 
 
@@ -117,6 +127,7 @@ def delete_date_times(date):
                           + date.strftime("%Y-%m-%d") + "'"):
         print('Deleted sleep time ' + row[1] + ' to ' + row[2] +
               ' on ' + row[0])
+
     db.execute("DELETE FROM sleep_times WHERE date='" +
                date.strftime("%Y-%m-%d") + "'")
     conn.commit()
@@ -139,6 +150,7 @@ def db_setup():
     except KeyError:
         db_file = Path("/home/" + getpass.getuser() +
                        "/.local/share/slept/slept.db")
+
     db_file.parent.mkdir(0o700, parents=True, exist_ok=True)
     db_file.touch(mode=0o700, exist_ok=True)
     global conn, db
