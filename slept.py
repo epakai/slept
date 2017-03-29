@@ -218,7 +218,8 @@ def draw_line(pos, date, win):
     win.vline(pos-1, 10, curses.ACS_VLINE, 1)
     win.addstr(pos-1, 11, scale_times(date, width-11-13))
     win.vline(pos-1, width-13, curses.ACS_VLINE, 1)
-    win.insstr(pos-1, width-12, "*"*sum_times(date))
+    sleep_total = sum_times(date)
+    win.insstr(pos-1, width-12, "*"*sleep_total + " "*(12-sleep_total))
     win.refresh()
     return
 
@@ -246,7 +247,7 @@ def page_up(win, last_date):
     win.scroll(-win.getmaxyx()[0])
     height = win.getmaxyx()[0]
     last_date = last_date - timedelta(days=height)
-    draw_screen(last_date, win)
+    draw_screen(win, last_date)
     return last_date
 
 
@@ -257,14 +258,15 @@ def page_down(win, last_date):
     if (last_date >= date.today()):
         last_date = date.today()
 
-    draw_screen(last_date, win)
+    draw_screen(win, last_date)
     return last_date
 
 
-def draw_screen(last_date, win):
+def draw_screen(win, last_date):
     height = win.getmaxyx()[0]
     for pos in range(height, 0, -1):
         draw_line(pos, last_date - timedelta(days=height-pos), win)
+    return last_date
 
 
 def input_function(key):
@@ -275,6 +277,7 @@ def input_function(key):
         curses.KEY_DOWN:  scroll_down,
         curses.KEY_PPAGE: page_up,
         curses.KEY_NPAGE: page_down,
+        curses.KEY_RESIZE: draw_screen,
     }
     return keyaction.get(key)
 
@@ -288,10 +291,9 @@ def display_log():
     try:
         win = curses.newwin(screen.getmaxyx()[0], screen.getmaxyx()[1])
         win.keypad(1)
-        height, width = win.getmaxyx()
         win.scrollok(1)
         last_date = date.today()
-        draw_screen(last_date, win)
+        draw_screen(win, last_date)
 
         key = win.getch()
         while (chr(key) is not 'q' and key is not 27):
