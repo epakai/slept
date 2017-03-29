@@ -5,7 +5,8 @@ import os
 import sqlite3
 import argparse
 import sys
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
+import curses
 
 
 def datespec_conv(datespec):
@@ -134,12 +135,145 @@ def delete_date_times(date):
     return
 
 
+def sum_times(date):
+    times = get_date_times(date)
+    hours = 0
+    minutes = 0
+    for time in times:
+        if (time[0].hour >= 12):
+            if(time[1].hour < 12):
+                hour = (time[1].hour + 12) - (time[0].hour - 12)
+            else:
+                hour = time[1].hour - time[0].hour
+
+        else:
+            if(time[1].hour < 12):
+                hour = time[1].hour - time[0].hour
+            else:
+                hour = (time[1].hour - 12) - (time[0].hour + 12)
+
+        if (time[0].minute > time[1].minute):
+            hour = hour - 1
+            minute = 60 - (time[0].minute - time[1].minute)
+        elif (time[0].minute < time[1].minute):
+            minute = time[1].minute - time[0].minute
+        else:
+            minute = 0
+
+        hours = hours + hour
+        minutes = minutes + minute
+
+    if (minutes > 60):
+        hours = hours + minutes // 60
+        minutes = minutes % 60
+
+    if (minutes > 30):
+        return (hours + 1)
+    else:
+        return hours
+
+
 def scale_times(date, width):
+    times = get_date_times(date)
+    for time in times:
+        pass
+    return "a"*width
+
+
+def draw_line(pos, date, win):
+    height, width = win.getmaxyx()
+    win.addstr(pos-1, 0, date.strftime('%Y-%m-%d'))
+    win.vline(pos-1, 10, curses.ACS_VLINE, 1)
+    win.addstr(pos-1, 11, scale_times(date, width-11-13))
+    win.vline(pos-1, width-13, curses.ACS_VLINE, 1)
+    win.insstr(pos-1, width-12, "*"*sum_times(date))
+    win.refresh()
     return
 
 
+def scroll_up(win, last_date):
+    win.scroll(-1)
+    height = win.getmaxyx()[0]
+    new_date = last_date - timedelta(days=height)
+    draw_line(1, new_date, win)
+    return last_date - timedelta(days=1)
+
+
+def scroll_down(win, last_date):
+    if (last_date == date.today()):
+        return last_date
+    else:
+        win.scroll(1)
+        height = win.getmaxyx()[0]
+        new_date = last_date + timedelta(days=1)
+        draw_line(height, new_date, win)
+        return new_date
+
+
+def page_up(win, last_date):
+    win.scroll(-win.getmaxyx()[0])
+    height = win.getmaxyx()[0]
+    last_date = last_date - timedelta(days=height)
+    draw_screen(last_date, win)
+    return last_date
+
+
+def page_down(win, last_date):
+    win.scroll(win.getmaxyx()[0])
+    height = win.getmaxyx()[0]
+    last_date = last_date + timedelta(days=height)
+    if (last_date >= date.today()):
+        last_date = date.today()
+
+    draw_screen(last_date, win)
+    return last_date
+
+
+def draw_screen(last_date, win):
+    height = win.getmaxyx()[0]
+    for pos in range(height, 0, -1):
+        draw_line(pos, last_date - timedelta(days=height-pos), win)
+
+
+def input_function(key):
+    keyaction = {
+        ord('k'):         scroll_up,
+        curses.KEY_UP:    scroll_up,
+        ord('j'):         scroll_down,
+        curses.KEY_DOWN:  scroll_down,
+        curses.KEY_PPAGE: page_up,
+        curses.KEY_NPAGE: page_down,
+    }
+    return keyaction.get(key)
+
+
 def display_log():
-    print("RUNNING DISPLAY LOG")
+    os.environ.setdefault('ESCDELAY', '25')
+    screen = curses.initscr()
+    curses.noecho()
+    curses.cbreak()
+    curses.curs_set(0)
+    try:
+        win = curses.newwin(screen.getmaxyx()[0], screen.getmaxyx()[1])
+        win.keypad(1)
+        height, width = win.getmaxyx()
+        win.scrollok(1)
+        last_date = date.today()
+        draw_screen(last_date, win)
+
+        key = win.getch()
+        while (chr(key) is not 'q' and key is not 27):
+            try:
+                last_date = input_function(key)(win, last_date)
+            except TypeError:
+                pass
+            key = win.getch()
+
+    finally:
+        screen.keypad(0)
+        curses.nocbreak()
+        curses.echo()
+        curses.endwin()
     return
 
 
@@ -151,7 +285,11 @@ def db_setup():
         db_file = Path("/home/" + getpass.getuser() +
                        "/.local/share/slept/slept.db")
 
-    db_file.parent.mkdir(0o700, parents=True, exist_ok=True)
+    try:
+        db_file.parent.mkdir(0o700, parents=True)
+    except FileExistsError:
+        pass
+
     db_file.touch(mode=0o700, exist_ok=True)
     global conn, db
     conn = sqlite3.connect(str(db_file))
