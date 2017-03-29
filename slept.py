@@ -214,12 +214,28 @@ def scale_times(date, width):
 
 def draw_line(pos, date, win):
     height, width = win.getmaxyx()
+    win.attrset(curses.color_pair(4))
     win.addstr(pos-1, 0, date.strftime('%Y-%m-%d'))
+    win.attrset(curses.color_pair(1))
     win.vline(pos-1, 10, curses.ACS_VLINE, 1)
-    win.addstr(pos-1, 11, scale_times(date, width-11-13))
+    times_chart = scale_times(date,width-11-13)
+    times_chart_list = list(times_chart)
+    win.attrset(curses.color_pair(3))
+    for i in range(0, times_chart.__len__()):
+        if (times_chart_list[i] is ' '):
+            win.addch(pos-1, 11+i, ' ')
+        else:
+            win.addch(pos-1, 11+i, curses.ACS_BLOCK)
+    win.attrset(curses.color_pair(1))
+
     win.vline(pos-1, width-13, curses.ACS_VLINE, 1)
     sleep_total = sum_times(date)
-    win.insstr(pos-1, width-12, "*"*sleep_total + " "*(12-sleep_total))
+    for i in range(0, sleep_total):
+        win.attrset(curses.color_pair(2))
+        win.addch(pos-1, width-12+i, curses.ACS_DIAMOND)
+        win.attrset(curses.color_pair(1))
+    for i in range(sleep_total, 12-sleep_total):
+        win.addch(pos-1, width-12+i, ' ')
     win.refresh()
     return
 
@@ -289,6 +305,11 @@ def display_log():
     curses.cbreak()
     curses.curs_set(0)
     try:
+        curses.start_color()
+        curses.init_pair(1, curses.COLOR_WHITE, 0)
+        curses.init_pair(2, curses.COLOR_GREEN, 0)
+        curses.init_pair(3, curses.COLOR_CYAN, 0)
+        curses.init_pair(4, curses.COLOR_RED, 0)
         win = curses.newwin(screen.getmaxyx()[0], screen.getmaxyx()[1])
         win.keypad(1)
         win.scrollok(1)
