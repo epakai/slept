@@ -5,8 +5,9 @@ import os
 import sqlite3
 import argparse
 import sys
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, time
 import curses
+import math
 
 
 def datespec_conv(datespec):
@@ -173,11 +174,42 @@ def sum_times(date):
         return hours
 
 
+def time_is_in_set(time, sleep_times):
+    for sleeptime in sleep_times:
+        if (sleep_time_key((time, None)) >= sleep_time_key(sleeptime) and
+            sleep_time_key((time, None)) <= sleep_time_key((sleeptime[1], None))):
+            return True
+
+    return False
+
+
 def scale_times(date, width):
-    times = get_date_times(date)
-    for time in times:
-        pass
-    return "a"*width
+    sleep_times = get_date_times(date)
+    scale = 24/width
+    first_half = []
+    for block in range(math.floor(width/2), width):
+        fraction_time = block * scale
+        hours = math.floor(fraction_time)
+        minutes = math.floor((fraction_time - hours) * 60)
+        block_time = time(hours, minutes)
+        if(time_is_in_set(block_time, sleep_times)):
+            first_half.append('#')
+        else:
+            first_half.append(' ')
+
+    second_half = []
+    for block in range(0, math.floor(width/2)):
+        fraction_time = block * scale
+        hours = math.floor(fraction_time)
+        minutes = math.floor((fraction_time - hours) * 60)
+        block_time = time(hours, minutes)
+        if(time_is_in_set(block_time, sleep_times)):
+            second_half.append('#')
+        else:
+            second_half.append(' ')
+
+    final = "".join(first_half) + "".join(second_half)
+    return final
 
 
 def draw_line(pos, date, win):
