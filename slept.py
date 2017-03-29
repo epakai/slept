@@ -218,7 +218,8 @@ def draw_line(pos, date, win):
     win.addstr(pos-1, 0, date.strftime('%Y-%m-%d'))
     win.attrset(curses.color_pair(1))
     win.vline(pos-1, 10, curses.ACS_VLINE, 1)
-    times_chart = scale_times(date,width-11-13)
+
+    times_chart = scale_times(date, width-11-13)
     times_chart_list = list(times_chart)
     win.attrset(curses.color_pair(3))
     for i in range(0, times_chart.__len__()):
@@ -231,7 +232,12 @@ def draw_line(pos, date, win):
     win.vline(pos-1, width-13, curses.ACS_VLINE, 1)
     sleep_total = sum_times(date)
     for i in range(0, sleep_total):
-        win.attrset(curses.color_pair(2))
+        if (sleep_total <= 4):
+            win.attrset(curses.color_pair(4))
+        elif (sleep_total <= 6):
+            win.attrset(curses.color_pair(5))
+        else:
+            win.attrset(curses.color_pair(2))
         win.addch(pos-1, width-12+i, curses.ACS_DIAMOND)
         win.attrset(curses.color_pair(1))
     for i in range(sleep_total, 12-sleep_total):
@@ -242,7 +248,7 @@ def draw_line(pos, date, win):
 
 def scroll_up(win, last_date):
     win.scroll(-1)
-    height = win.getmaxyx()[0]
+    height = win.getmaxyx()[0]-1
     new_date = last_date - timedelta(days=height)
     draw_line(1, new_date, win)
     return last_date - timedelta(days=1)
@@ -253,7 +259,7 @@ def scroll_down(win, last_date):
         return last_date
     else:
         win.scroll(1)
-        height = win.getmaxyx()[0]
+        height = win.getmaxyx()[0]-1
         new_date = last_date + timedelta(days=1)
         draw_line(height, new_date, win)
         return new_date
@@ -261,7 +267,7 @@ def scroll_down(win, last_date):
 
 def page_up(win, last_date):
     win.scroll(-win.getmaxyx()[0])
-    height = win.getmaxyx()[0]
+    height = win.getmaxyx()[0]-1
     last_date = last_date - timedelta(days=height)
     draw_screen(win, last_date)
     return last_date
@@ -269,7 +275,7 @@ def page_up(win, last_date):
 
 def page_down(win, last_date):
     win.scroll(win.getmaxyx()[0])
-    height = win.getmaxyx()[0]
+    height = win.getmaxyx()[0]-1
     last_date = last_date + timedelta(days=height)
     if (last_date >= date.today()):
         last_date = date.today()
@@ -279,7 +285,7 @@ def page_down(win, last_date):
 
 
 def draw_screen(win, last_date):
-    height = win.getmaxyx()[0]
+    height = win.getmaxyx()[0]-1
     for pos in range(height, 0, -1):
         draw_line(pos, last_date - timedelta(days=height-pos), win)
     return last_date
@@ -298,6 +304,24 @@ def input_function(key):
     return keyaction.get(key)
 
 
+def draw_title(screen):
+    curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_BLUE)
+    screen.attrset(curses.color_pair(6))
+    screen.addstr(0, 0, "   Date   ")
+    screen.addch(0, 10, curses.ACS_VLINE)
+    width = screen.getmaxyx()[1]
+    mid_section_width = width - 11 - 13
+    screen.addstr(0, 11, " "*mid_section_width)
+    screen.addstr(0, 11 + math.floor(mid_section_width/4-3), "18:00")
+    screen.addstr(0, 11 + math.floor(mid_section_width/2-4), "midnight")
+    screen.addstr(0, 11 + math.floor(mid_section_width*(3/4)-3), "06:00")
+
+    screen.addch(0, width-13, curses.ACS_VLINE)
+    screen.addstr(0, width-12, "     Sum    ")
+    screen.attrset(curses.color_pair(1))
+    screen.refresh()
+
+
 def display_log():
     os.environ.setdefault('ESCDELAY', '25')
     screen = curses.initscr()
@@ -310,7 +334,9 @@ def display_log():
         curses.init_pair(2, curses.COLOR_GREEN, 0)
         curses.init_pair(3, curses.COLOR_CYAN, 0)
         curses.init_pair(4, curses.COLOR_RED, 0)
-        win = curses.newwin(screen.getmaxyx()[0], screen.getmaxyx()[1])
+        curses.init_pair(5, curses.COLOR_YELLOW, 0)
+        draw_title(screen)
+        win = curses.newwin(screen.getmaxyx()[0], screen.getmaxyx()[1], 1, 0)
         win.keypad(1)
         win.scrollok(1)
         last_date = date.today()
@@ -320,6 +346,8 @@ def display_log():
         while (chr(key) is not 'q' and key is not 27):
             try:
                 last_date = input_function(key)(win, last_date)
+                if (key == curses.KEY_RESIZE):
+                    draw_title(screen)
             except TypeError:
                 pass
             key = win.getch()
