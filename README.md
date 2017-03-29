@@ -11,10 +11,10 @@ It is written in python, uses ncurses for display, and sqllite to store entries.
 Slept takes new entries from command line arguments.
 It errors on these conditions:
 
-	* Date already in database (override with **-R** or **-a**)
-	* Future dates are not accepted
-	* Invalid times or out of order times (start after finish)
-	* Overlapping times
+* Date already in database (override with **-R** or **-a**)
+* Future dates are not accepted
+* Invalid times or out of order times (start after finish)
+* Overlapping times
 
 
 New entry:
