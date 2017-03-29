@@ -1,8 +1,10 @@
 ## Synopsis
 
 Slept is a command line sleep logger and log viewer.
-It uses 24-hour times, and each date encompasses the 24 hours before noon. 
-It is written in python, uses ncurses for display, and sqllite to store entries.
+
+It uses 24-hour times, and each date encompasses the 24 hours before noon that day.
+
+It is written in python, uses curses for display, and sqllite to store entries.
 
 ![Slept display log output](/shot.png)
 
