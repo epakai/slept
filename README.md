@@ -15,21 +15,20 @@ It errors on these conditions:
 	* Invalid times or out of order times (start after finish)
 	* Overlapping times
 
-Example calls:
 
-	New entry:
+New entry:
 	**slept.py 15-5:30 6-8**
 
-	New entry with date:
+New entry with date:
 	**slept.py -d 2-28 22-6**
 
-	Replace entries (full date is optional, current year will be used):
+Replace entries (full date is optional, current year will be used):
 	**slept.py -R -d 2017-02-28 20-5**
 
-	Add time to a date:
+Add time to a date:
 	**slept.py -a -d 2-28 6:30-9**
 
-	Delete today's entries (or combine with **-d** option):
+Delete today's entries (or combine with **-d** option):
 	**slept.py --delete**
 
 When called without arguments it displays sleep logs in console with 
