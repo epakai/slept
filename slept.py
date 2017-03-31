@@ -6,8 +6,11 @@ import sqlite3
 import argparse
 import sys
 from datetime import date, datetime, timedelta, time
-import curses
 import math
+import curses
+
+# array of times to be highlighted
+ideal_time = [(time(22, 0), time(6, 0))]
 
 
 def datespec_conv(datespec):
@@ -184,6 +187,7 @@ def time_is_in_set(time, sleep_times):
 
 
 def scale_times(date, width):
+    global ideal_time
     sleep_times = get_date_times(date)
     scale = 24/width
     first_half = []
@@ -193,7 +197,11 @@ def scale_times(date, width):
         minutes = math.floor((fraction_time - hours) * 60)
         block_time = time(hours, minutes)
         if(time_is_in_set(block_time, sleep_times)):
-            first_half.append('#')
+            if (time_is_in_set(block_time, ideal_time)):
+                first_half.append('#')
+            else:
+                first_half.append('%')
+
         else:
             first_half.append(' ')
 
@@ -204,7 +212,11 @@ def scale_times(date, width):
         minutes = math.floor((fraction_time - hours) * 60)
         block_time = time(hours, minutes)
         if(time_is_in_set(block_time, sleep_times)):
-            second_half.append('#')
+            if (time_is_in_set(block_time, ideal_time)):
+                second_half.append('#')
+            else:
+                second_half.append('%')
+
         else:
             second_half.append(' ')
 
@@ -213,22 +225,28 @@ def scale_times(date, width):
 
 
 def draw_line(pos, date, win):
+    # Date column
     height, width = win.getmaxyx()
     win.attrset(curses.color_pair(4))
     win.addstr(pos-1, 0, date.strftime('%Y-%m-%d'))
     win.attrset(curses.color_pair(1))
     win.vline(pos-1, 10, curses.ACS_VLINE, 1)
 
+    # Time column
     times_chart = scale_times(date, width-11-13)
     times_chart_list = list(times_chart)
-    win.attrset(curses.color_pair(3))
-    for i in range(0, times_chart.__len__()):
-        if (times_chart_list[i] is ' '):
-            win.addch(pos-1, 11+i, ' ')
-        else:
+    for i in range(0, len(times_chart)):
+        if (times_chart_list[i] is '%'):
+            win.attrset(curses.color_pair(3))
             win.addch(pos-1, 11+i, curses.ACS_BLOCK)
+        elif (times_chart_list[i] is '#'):
+            win.attrset(curses.color_pair(7))
+            win.addch(pos-1, 11+i, curses.ACS_BLOCK)
+        else:
+            win.addch(pos-1, 11+i, ' ')
     win.attrset(curses.color_pair(1))
 
+    # Sum column
     win.vline(pos-1, width-13, curses.ACS_VLINE, 1)
     sleep_total = sum_times(date)
     for i in range(0, sleep_total):
@@ -305,7 +323,6 @@ def input_function(key):
 
 
 def draw_title(screen):
-    curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_BLUE)
     screen.attrset(curses.color_pair(6))
     screen.addstr(0, 0, "   Date   ")
     screen.addch(0, 10, curses.ACS_VLINE)
@@ -335,6 +352,8 @@ def display_log():
         curses.init_pair(3, curses.COLOR_CYAN, 0)
         curses.init_pair(4, curses.COLOR_RED, 0)
         curses.init_pair(5, curses.COLOR_YELLOW, 0)
+        curses.init_pair(6, curses.COLOR_WHITE, curses.COLOR_BLUE)
+        curses.init_pair(7, curses.COLOR_BLUE, 0)
         draw_title(screen)
         win = curses.newwin(screen.getmaxyx()[0], screen.getmaxyx()[1], 1, 0)
         win.keypad(1)
