@@ -295,8 +295,8 @@ def page_down(win, last_date):
     win.scroll(win.getmaxyx()[0])
     height = win.getmaxyx()[0]-1
     last_date = last_date + datetime.timedelta(days=height)
-    if (last_date >= date.today()):
-        last_date = date.today()
+    if (last_date >= datetime.date.today()):
+        last_date = datetime.date.today()
 
     draw_screen(win, last_date)
     return last_date
