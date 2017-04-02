@@ -227,23 +227,28 @@ def scale_times(date, width):
 def draw_line(pos, date, win):
     # Date column
     height, width = win.getmaxyx()
-    win.attrset(curses.color_pair(4))
-    win.addstr(pos-1, 0, date.strftime('%Y-%m-%d'))
+    # Color saturday/sunday differently
+    if (date.strftime('%w') == '0' or date.strftime('%w') == '6'):
+        win.attrset(curses.color_pair(7))
+    else:
+        win.attrset(curses.color_pair(4))
+    win.addstr(pos-1, 0, date.strftime('%a'))
+    win.addstr(pos-1, 4, date.strftime('%Y-%m-%d'))
     win.attrset(curses.color_pair(1))
-    win.vline(pos-1, 10, curses.ACS_VLINE, 1)
+    win.vline(pos-1, 14, curses.ACS_VLINE, 1)
 
     # Time column
-    times_chart = scale_times(date, width-11-13)
+    times_chart = scale_times(date, width-15-13)
     times_chart_list = list(times_chart)
     for i in range(0, len(times_chart)):
         if (times_chart_list[i] is '%'):
             win.attrset(curses.color_pair(3))
-            win.addch(pos-1, 11+i, curses.ACS_BLOCK)
+            win.addch(pos-1, 15+i, curses.ACS_BLOCK)
         elif (times_chart_list[i] is '#'):
             win.attrset(curses.color_pair(7))
-            win.addch(pos-1, 11+i, curses.ACS_BLOCK)
+            win.addch(pos-1, 15+i, curses.ACS_BLOCK)
         else:
-            win.addch(pos-1, 11+i, ' ')
+            win.addch(pos-1, 15+i, ' ')
     win.attrset(curses.color_pair(1))
 
     # Sum column
@@ -324,14 +329,14 @@ def input_function(key):
 
 def draw_title(screen):
     screen.attrset(curses.color_pair(6))
-    screen.addstr(0, 0, "   Date   ")
-    screen.addch(0, 10, curses.ACS_VLINE)
+    screen.addstr(0, 0, "     Date     ")
+    screen.addch(0, 14, curses.ACS_VLINE)
     width = screen.getmaxyx()[1]
-    mid_section_width = width - 11 - 13
-    screen.addstr(0, 11, " "*mid_section_width)
-    screen.addstr(0, 11 + math.floor(mid_section_width/4-3), "18:00")
-    screen.addstr(0, 11 + math.floor(mid_section_width/2-4), "midnight")
-    screen.addstr(0, 11 + math.floor(mid_section_width*(3/4)-3), "06:00")
+    mid_section_width = width - 15 - 13
+    screen.addstr(0, 15, " "*mid_section_width)
+    screen.addstr(0, 15 + math.floor(mid_section_width/4-3), "18:00")
+    screen.addstr(0, 15 + math.floor(mid_section_width/2-4), "midnight")
+    screen.addstr(0, 15 + math.floor(mid_section_width*(3/4)-3), "06:00")
 
     screen.addch(0, width-13, curses.ACS_VLINE)
     screen.addstr(0, width-12, "     Sum    ")
