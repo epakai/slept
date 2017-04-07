@@ -253,7 +253,8 @@ def draw_line(pos, date, win):
 
     # Sum column
     win.vline(pos-1, width-13, curses.ACS_VLINE, 1)
-    sleep_total = sum_times(date)
+    # sleep more than 12 hours is not indicated
+    sleep_total = min([sum_times(date), 12])
     for i in range(0, sleep_total):
         if (sleep_total <= 4):
             win.attrset(curses.color_pair(4))
