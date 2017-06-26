@@ -4,7 +4,7 @@ Slept is a command line sleep logger and log viewer.
 
 It uses 24-hour times, and each date encompasses the 24 hours before noon that day.
 
-It is written in python, uses curses for display, and sqllite to store entries.
+It is written in python, uses curses for display, and sqlite to store entries.
 
 ![Slept display log output](/screenshot.png)
 
@@ -19,19 +19,19 @@ It errors on these conditions:
 * Overlapping times
 
 
-New entry:
+New entry (two periods of sleep):
 
 	slept.py 15-5:30 6-8
 
-New entry with date:
+New entry with date (date follows **-d** option, then the time period):
 
 	slept.py -d 2-28 22-6
 
-Replace entries (full date is optional, current year will be used):
+Replace an entry (full date is optional, current year will be used):
 
 	slept.py -R -d 2017-02-28 20-5
 
-Add time to a date:
+Add time to a date (**-a** for append, specify the date and new time(s)):
 
 	slept.py -a -d 2-28 6:30-9
 
